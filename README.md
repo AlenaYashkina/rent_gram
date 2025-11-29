@@ -1,6 +1,6 @@
 # Rent Gram
 
-Scraper + frontend viewer for Telegram rental listings.
+Scraper + frontend viewer for Telegram rental listings. Visit the live demo at https://rent-gram.netlify.app/ for quick browsing of the generated feed.
 
 ## What it does
 - Scrapes Telegram channels (LLM-guided discovery) and writes enriched NDJSON (`out.ndjson`).
@@ -33,10 +33,6 @@ FX_SOURCE=https://open.er-api.com/v6
 3) Run scraper:
 ```bash
 python main.py --city "Batumi" --country "Georgia" --limit 10
-python main.py --city "Tbilisi" --country "Georgia" --limit 10
-python main.py --city "Yerevan" --country "Armenia" --limit 10
-python main.py --city "Belgrade" --country "Serbia" --limit 10
-python main.py --city "Moscow" --country "Russia" --limit 10
 ```
 - Logs: stdout + `logs/run.log`
 - Output: `out.ndjson` (one listing per line, with analysis+price_usd)
