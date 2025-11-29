@@ -1,0 +1,9 @@
+# Core scraping/LLM utilities
+telethon==1.34.0
+requests==2.31.0
+python-dotenv==1.0.0
+pytz==2024.1
+
+# Optional helpers (data/export)
+Pillow==10.3.0
+python-pptx==0.6.23

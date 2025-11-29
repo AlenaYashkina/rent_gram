@@ -1,0 +1,13 @@
+.env
+*.session
+state.sqlite*
+__pycache__/
+*.pyc
+logs/
+.vscode/
+.conda/
+*.zip
+frontend/node_modules/
+frontend/dist/
+
+specification
