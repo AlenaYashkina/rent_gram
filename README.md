@@ -216,5 +216,8 @@ This makes it easy to:
 
 ## About the author
 
-Rent Gram is a flagship side project by **Alena Yashkina** – a lighting engineer who moved into **AI‑driven automation** for real‑world workflows (reporting, scraping, and smart UIs for messy data).
+Built by **Alena Yashkina** — lighting engineer turned AI‑automation developer.  
+Portfolio and contact links:
 
+- GitHub: https://github.com/AlenaYashkina
+- LinkedIn: https://www.linkedin.com/in/alena-yashkina-a9994a35a/
