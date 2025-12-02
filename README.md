@@ -2,9 +2,14 @@
 
 Scraper + React viewer for messy Telegram rental channels.
 
-The tool turns unstructured rental posts from Telegram into a searchable listing feed with **price filters, semantic amenity search and currency‑normalized prices** – similar to a regular real‑estate site, but powered by your own local LLM.
+The tool turns unstructured rental posts from Telegram into a searchable listing feed with **price filters, semantic amenity search and currency-normalized prices** - similar to a regular real-estate site, but powered by your own local LLM.
 
-> Built and used in production to find a sea‑view apartment in Batumi at the price of two separate studios.
+## Screenshot
+
+![Rent Gram UI preview](docs/screenshots/hero.png)
+
+> Built and used in production to find a sea-view apartment in Batumi at the price of two separate studios.
+
 
 ---
 
