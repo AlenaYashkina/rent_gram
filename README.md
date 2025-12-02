@@ -2,13 +2,13 @@
 
 Scraper + React viewer for messy Telegram rental channels.
 
-The tool turns unstructured rental posts from Telegram into a searchable listing feed with **price filters, semantic amenity search and currency-normalized prices** - similar to a regular real-estate site, but powered by your own local LLM.
+The tool turns unstructured rental posts from Telegram into a searchable listing feed with **price filters, semantic amenity search and currency‑normalized prices** – similar to a regular real‑estate site, but powered by your own local LLM.
 
 ## Screenshot
 
 ![Rent Gram UI preview](docs/screenshots/hero.png)
 
-> Built and used in production to find a sea-view apartment in Batumi at the price of two separate studios.
+> Built and used in production to find a sea‑view apartment in Batumi at the price of two separate studios.
 
 
 ---
@@ -221,5 +221,8 @@ This makes it easy to:
 
 ## About the author
 
-Rent Gram is a flagship side project by **Alena Yashkina** – a lighting engineer who moved into **AI‑driven automation** for real‑world workflows (reporting, scraping, and smart UIs for messy data).
+Built by **Alena Yashkina** — lighting engineer turned AI‑automation developer.  
+Portfolio and contact links:
 
+- GitHub: https://github.com/AlenaYashkina
+- LinkedIn: https://www.linkedin.com/in/alena-yashkina-a9994a35a/
