@@ -55,7 +55,8 @@ Lives in `frontend/` (Vite + React). Photos are not downloaded (per spec); UI sh
 - `mark_processed` happens after successful write to NDJSON to avoid losing posts on crashes.
 
 ## Screenshot
-![Main UI grid](docs/screenshots/hero.png)
+![Rent Gram UI preview](docs/screenshots/hero.png)
+Screenshot captured from `docs/screenshots/hero.png`, illustrating the main UI grid that the docs reference.
 
 ## Data format (analysis)
 Each NDJSON item has `analysis` matching the spec: flags (`is_rental_offer`, `is_short_term`, `passes_city_country`, `skip_reason`), location (`city/country/confidence`), nested `price { value_raw, currency_raw, source, usd, fx_rate, fx_source, fx_ts }`, `rooms`, `bedrooms { value, confidence }`, `bathrooms`, `is_studio`, `pets`, `long_term`, `amenities`, `district`, `address`, `notes`, `lang`, and `llm { model, prompt_ver }`.
