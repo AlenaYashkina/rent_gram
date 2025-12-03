@@ -2,6 +2,8 @@
 
 Scraper + React viewer for messy Telegram rental channels.
 
+**Live demo:** [https://rent-gram.netlify.app/](https://rent-gram.netlify.app/)
+
 The tool turns unstructured rental posts from Telegram into a searchable listing feed with **price filters, semantic amenity search and currency‑normalized prices** – similar to a regular real‑estate site, but powered by your own local LLM.
 
 ## Screenshot
