@@ -1,3 +1,5 @@
+[Русская версия](README.ru.md)
+
 # Rent Gram
 
 Scraper + React viewer for messy Telegram rental channels. **The public demo uses synthetic examples, not live property listings.**
