@@ -10,7 +10,9 @@ The tool turns unstructured rental posts from Telegram into a searchable listing
 
 ## Screenshot
 
-![Rent Gram UI preview](docs/screenshots/hero.png)
+![RentGram desktop interface captured with fictional demo data](docs/screenshots/hero.png)
+
+[View mobile screenshot](docs/screenshots/mobile.png) · [Source data and limitations](frontend/public/DEMO_DATA.md)
 
 > The workflow was used for personal rental search. Portfolio demo data are fictional and must not be interpreted as current offers.
 
