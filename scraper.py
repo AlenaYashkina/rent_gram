@@ -502,12 +502,15 @@ async def process_unit(
         state.record_locale_currency(city, country, currency)
     # FX fallback: if LLM didn't compute USD but gave currency+price
     if price_usd is None and price_value is not None and currency:
+        # open.er-api.com exposes a *latest* rate. Never label that rate as
+        # historical based on the message date; cache under the FX quote date.
+        latest_rate_source = "open.er-api.com" in fx_source.lower()
         date_key = datetime.now(UTC).date().isoformat()
-        if posted_at:
+        if posted_at and not latest_rate_source:
             try:
                 date_key = posted_at.date().isoformat()
-            except Exception:
-                date_key = datetime.now(UTC).date().isoformat()
+            except (TypeError, ValueError, AttributeError):
+                pass
         fx_rate = state.get_fx_rate(date_key, currency, "USD")
         if fx_rate is None:
             fx_rate = fetch_fx_rate(date_key, currency, "USD", fx_source)
@@ -518,7 +521,7 @@ async def process_unit(
                 price_usd = float(price_value) * fx_rate
                 price_data = dict(price_data)
                 price_data["fx_rate"] = fx_rate
-                price_data["fx_source"] = fx_source
+                price_data["fx_source"] = fx_source + (" (latest rate)" if latest_rate_source else "")
                 price_data["fx_ts"] = date_key
                 price_data["usd"] = price_usd
                 analysis["price"] = price_data
