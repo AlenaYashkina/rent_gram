@@ -117,8 +117,9 @@ function LazyTelegramEmbed({ chat, msgId, snippet }) {
 
 const convertAmount = (amount, from, to, rates) => {
   if (amount == null) return null;
-  const fromCur = (from || "USD").toUpperCase();
-  const toCur = (to || "USD").toUpperCase();
+  const fromCur = (from || "").toUpperCase();
+  const toCur = (to || "").toUpperCase();
+  if (!fromCur || !toCur) return null;
   if (fromCur === toCur) return amount;
   const fromRate = rates?.[fromCur];
   const toRate = rates?.[toCur];
@@ -168,7 +169,7 @@ const readCurrency = (item, displayCurrency, fx) => {
   const price = typeof usd === "number" ? usd : value;
   const priceCur = typeof usd === "number" ? "USD" : currency;
   if (typeof price !== "number") return null;
-  const converted = convertAmount(price, priceCur || "USD", displayCurrency, fx);
+  const converted = convertAmount(price, priceCur, displayCurrency, fx);
   return converted != null ? Math.round(converted) : null;
 };
 
@@ -299,13 +300,15 @@ export default function RentGramFrontMockup() {
 
     const base = listings.filter((item) => {
       const a = item.analysis || {};
+      // The demo is a long-term rental explorer: never treat sales or daily rates as monthly rent.
+      if (a.is_rental_offer === false || a.is_short_term === true || a.long_term === false) return false;
       const { usd, value } = extractPrice(a);
       const hasPrice = typeof usd === "number" || typeof value === "number";
       if (!hasPrice) return false;
       const bedroomsValue = extractBedrooms(item);
       if (bedroomsValue == null) return false;
       const converted = readCurrency(item, displayCurrency, fx);
-      if (converted != null && (converted < min || converted > max)) return false;
+      if ((minPrice || maxPrice) && (converted == null || converted < min || converted > max)) return false;
       if (bedrooms && +bedrooms !== bedroomsValue) return false;
       if (cityFilter && !(item.city || "").toLowerCase().includes(cityFilter.toLowerCase())) return false;
       if (countryFilter && !(item.country || "").toLowerCase().includes(countryFilter.toLowerCase())) return false;
@@ -494,10 +497,11 @@ export default function RentGramFrontMockup() {
 
         <section className="listing-panel">
           <div className="listing-header">
-            <div className="listing-count">Found listings: <strong>{filtered.length}</strong></div>
+            <div className="listing-count">Fictional demo · Monthly rentals: <strong>{filtered.length}</strong></div>
             {loadError && <div className="note">{loadError}</div>}
           </div>
-          {filtered.length === 0 && (
+          {status === "loading" && <p className="note">Loading demonstration listings…</p>}
+          {status !== "loading" && filtered.length === 0 && (
             <div className="listing-card">
               <div className="listing-embed">
                 <div className="embed-fallback">
@@ -532,7 +536,12 @@ export default function RentGramFrontMockup() {
             const petsValue =
               petsFlag === "allowed" ? "Allowed" : petsFlag === "not_allowed" ? "Forbidden" : null;
             const priceDisplay = readCurrency(item, displayCurrency, fx);
-            const priceMeta = priceDisplay != null ? `${priceDisplay} ${displayCurrency}/month` : null;
+            const rawPrice = extractPrice(item.analysis);
+            const priceMeta = priceDisplay != null
+              ? `${priceDisplay} ${displayCurrency}/month`
+              : rawPrice.value != null && rawPrice.currency
+                ? `${rawPrice.value} ${rawPrice.currency}/month (unconverted)`
+                : "Price unavailable";
             const messageId = getMsgId(item);
             const canEmbed = chatUsername && messageId;
             const postedAtLabel = formatDateTime(item);
