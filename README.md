@@ -1,6 +1,6 @@
 # Rent Gram
 
-Scraper + React viewer for messy Telegram rental channels.
+Scraper + React viewer for messy Telegram rental channels. **The public demo uses synthetic examples, not live property listings.**
 
 **Live demo:** [https://rent-gram.netlify.app/](https://rent-gram.netlify.app/)
 
@@ -10,7 +10,7 @@ The tool turns unstructured rental posts from Telegram into a searchable listing
 
 ![Rent Gram UI preview](docs/screenshots/hero.png)
 
-> Built and used in production to find a sea‑view apartment in Batumi at the price of two separate studios.
+> The workflow was used for personal rental search. Portfolio demo data are fictional and must not be interpreted as current offers.
 
 
 ---
@@ -65,9 +65,9 @@ Rent Gram solves this by:
 
 ---
 
-## Why it is interesting for recruiters
+## Personal contribution and limitations
 
-- **Real production use‑case** – not a toy demo; the pipeline was used to find and compare real apartments on the market.
+- **Practical use case** – the workflow was designed and used to compare apartment posts; deployment and extraction quality are not independently benchmarked.
 - **Telegram automation** – demonstrates working with Telethon, user sessions and large chats safely (stateful scraping, dedupe, retry logic).
 - **LLM‑powered extraction** – shows how to wrap a local LLM (Ollama / Qwen 2.5) in a deterministic analysis pipeline with clear JSON output.
 - **Data engineering mindset** – NDJSON dataset, `state.sqlite` for idempotency, FX caching, logging and configuration via `.env`.
@@ -94,6 +94,16 @@ Rent Gram solves this by:
 - Modern CSS layout for a compact, scrollable card grid
 
 ---
+
+## Quick demo (without a Telegram account or LLM)
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The checked-in `frontend/public/out.ndjson` contains fictional sample records. They intentionally contain no real contacts and should not be presented as live listings. Non-USD entries have no invented conversion rate. The demo is **not** proof of correct sale/rent classification or historical extraction accuracy; those cases still need automated verification.
 
 ## Quick start
 
