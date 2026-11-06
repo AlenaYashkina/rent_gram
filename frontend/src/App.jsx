@@ -1,3 +1,4 @@
+import { loadListingFeed } from "./listingLoader.mjs";
 import { isMonthlyRental, hasValidPrice, dedupeListings } from "./listingRules.mjs";
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { Search, Filter, DollarSign, PawPrint, MapPin, User, Hash, ExternalLink, Bed, Calendar } from "lucide-react";
@@ -9,20 +10,6 @@ const SYNONYMS = {
   "no commission": ["no commission", "без комиссии", "без агентской", "owner only", "no agency", "от собственника"],
   pets: ["pets", "pet", "animals", "животные", "питомцы"],
 };
-
-const parseNdjson = (text) =>
-  text
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      try {
-        return JSON.parse(line);
-      } catch {
-        return null;
-      }
-    })
-    .filter(Boolean);
 
 function getMsgId(item) {
   if (item && Array.isArray(item.message_ids) && item.message_ids.length) return item.message_ids[0];
@@ -229,38 +216,25 @@ export default function RentGramFrontMockup() {
   const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
+    let active = true;
     const loadListings = async () => {
       setStatus("loading");
       setLoadError("");
       try {
-        const res = await fetch("/api/listings", { cache: "no-store" });
-        if (res.ok) {
-          const text = await res.text();
-          const parsed = parseNdjson(text);
-          setListings(dedupeListings(parsed));
-          setFx((prev) => ({ ...prev, ...normalizeCurrencyRates(parsed) }));
-          setStatus("ready");
-          return;
-        }
+        const { listings: data } = await loadListingFeed();
+        if (!active) return;
+        setListings(dedupeListings(data));
+        setFx((prev) => ({ ...prev, ...normalizeCurrencyRates(data) }));
+        setStatus("ready");
       } catch (error) {
-        console.warn("Static demonstration data unavailable", error);
+        if (!active) return;
+        console.error("Could not load demonstration listings", error);
+        setLoadError("Could not load the synthetic demo listings. Please retry later.");
+        setStatus("error");
       }
-      try {
-        const res = await fetch("/out.ndjson", { cache: "no-store" });
-        if (res.ok) {
-          const data = await res.json();
-          setListings(dedupeListings(data));
-          setFx((prev) => ({ ...prev, ...normalizeCurrencyRates(data) }));
-          setStatus("ready");
-          return;
-        }
-      } catch (error) {
-        console.warn("API fallback unavailable", error);
-      }
-      setStatus("idle");
-      setLoadError("Не удалось автоматически загрузить out.ndjson из корня проекта.");
     };
     loadListings();
+    return () => { active = false; };
   }, []);
 
   useEffect(() => {
@@ -367,7 +341,7 @@ export default function RentGramFrontMockup() {
         <div className="brand">
           <div className="brand-mark">RG</div>
           <div className="brand-text">
-            <div className="brand-title">Rentagram</div>
+            <div className="brand-title">RentGram</div>
             <div className="brand-sub">Listings hub</div>
           </div>
         </div>
@@ -512,7 +486,7 @@ export default function RentGramFrontMockup() {
                     </svg>
                   </div>
                   <p className="embed-title">Telegram post embed</p>
-                  <p className="embed-subtitle">Use Telegram Widget API for real integration</p>
+                  <p className="embed-subtitle">Illustrative listing source; no live Telegram connection</p>
                 </div>
               </div>
               <div className="listing-meta">
