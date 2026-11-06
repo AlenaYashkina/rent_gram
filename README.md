@@ -90,7 +90,7 @@ Rent Gram solves this by:
 
 - Node 18+
 - Vite + React
-- TypeScript (optional depending on branch)
+- JavaScript / React JSX
 - Modern CSS layout for a compact, scrollable card grid
 
 ---
@@ -168,8 +168,8 @@ Then open the shown `http://localhost:<PORT>/`.
 
 By default the UI tries:
 
-1. `/api/listings` – if you have a tiny server that streams `out.ndjson`;
-2. `/out.ndjson` – if you serve the backend folder via any static server;
+1. `/out.ndjson` – synthetic demo data served by the frontend;
+2. `/api/listings` – optional backend endpoint, used only as fallback;
 3. manual file import – click **Import NDJSON** and choose a local file.
 
 ---
@@ -237,4 +237,4 @@ Built by **Alena Yashkina** — lighting engineer turned AI‑automation develop
 Portfolio and contact links:
 
 - GitHub: https://github.com/AlenaYashkina
-- LinkedIn: https://www.linkedin.com/in/alena-yashkina-a9994a35a/
+- LinkedIn: https://www.linkedin.com/in/alena-yashkina
