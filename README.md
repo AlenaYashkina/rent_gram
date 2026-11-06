@@ -237,8 +237,10 @@ This makes it easy to:
 
 ## About the author
 
-Built by **Alena Yashkina** — lighting engineer turned AI‑automation developer.  
+Built by **Alena Yashkina** — workflow automation specialist using AI-assisted development.  
 Portfolio and contact links:
 
 - GitHub: https://github.com/AlenaYashkina
 - LinkedIn: https://www.linkedin.com/in/alena-yashkina
+- Telegram: https://t.me/alena_yashkina
+- Email: alenaiashkina1@gmail.com
