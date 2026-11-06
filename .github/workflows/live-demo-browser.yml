@@ -1,0 +1,32 @@
+name: Verify published Netlify demo in Chromium
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [.github/workflows/live-demo-browser.yml]
+jobs:
+  live-demo:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm install --no-save --no-package-lock playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/live-demo.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: published-rentgram-browser-capture
+          path: frontend/artifacts/live-netlify-browser.png
+          if-no-files-found: ignore
