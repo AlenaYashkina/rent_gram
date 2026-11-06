@@ -283,45 +283,19 @@ def _clean_currency(value: Any) -> Optional[str]:
     if isinstance(value, str):
         token = value.strip().upper()
         replacements = {
-            "$": "USD",
-            "USD": "USD",
-            "USDT": "USD",
-            "DOLLAR": "USD",
-            "?": "EUR",
-            "EUR": "EUR",
-            "RSD": "RSD",
-            "DIN": "RSD",
-            "DINAR": "RSD",
-            "DINARA": "RSD",
-            "GBP": "GBP",
-            "?": "GBP",
-            "GEL": "GEL",
-            "LARI": "GEL",
-            "?": "GEL",
-            "RUB": "RUB",
-            "?": "RUB",
-            "TRY": "TRY",
-            "LIRA": "TRY",
-            "?": "TRY",
-            "UAH": "UAH",
-            "?": "UAH",
-            "KZT": "KZT",
-            "?": "KZT",
-            "PLN": "PLN",
-            "CHF": "CHF",
-            "AUD": "AUD",
-            "CAD": "CAD",
-            "NZD": "NZD",
-            "THB": "THB",
-            "?": "THB",
-            "AED": "AED",
-            "SAR": "SAR",
-            "KWD": "KWD",
-            "JPY": "JPY",
-            "CNY": "CNY",
-            "HKD": "HKD",
-            "BTC": "BTC",
-            "?": "BTC",
+            "$": "USD", "USD": "USD", "DOLLAR": "USD", "DOLLARS": "USD",
+            "€": "EUR", "EUR": "EUR",
+            "£": "GBP", "GBP": "GBP",
+            "₾": "GEL", "GEL": "GEL", "LARI": "GEL", "ЛАРИ": "GEL",
+            "₽": "RUB", "RUB": "RUB", "РУБ": "RUB", "РУБЛЕЙ": "RUB",
+            "֏": "AMD", "AMD": "AMD", "DRAM": "AMD", "ДРАМ": "AMD",
+            "₺": "TRY", "TRY": "TRY", "LIRA": "TRY",
+            "₴": "UAH", "UAH": "UAH",
+            "₸": "KZT", "KZT": "KZT",
+            "RSD": "RSD", "DIN": "RSD", "DINAR": "RSD",
+            "PLN": "PLN", "CHF": "CHF", "AUD": "AUD", "CAD": "CAD",
+            "NZD": "NZD", "THB": "THB", "AED": "AED", "SAR": "SAR",
+            "KWD": "KWD", "JPY": "JPY", "CNY": "CNY", "HKD": "HKD",
         }
         if token in replacements:
             return replacements[token]
@@ -353,7 +327,7 @@ def _clean_text_field(value: Any) -> Optional[str]:
 def _ensure_analysis_schema(raw: Dict[str, Any]) -> Dict[str, Any]:
     normalized: Dict[str, Any] = {key: None for key in ANALYSIS_KEYS}
     normalized["is_rental_offer"] = _coerce_bool(raw.get("is_rental_offer"))
-    normalized["is_short_term"] = _coerce_bool(raw.get("is_short_term") or raw.get("short_term"))
+    normalized["is_short_term"] = _coerce_bool(raw["is_short_term"] if "is_short_term" in raw else raw.get("short_term"))
     normalized["passes_city_country"] = _coerce_bool(raw.get("passes_city_country"))
     normalized["skip_reason"] = _clean_text_field(raw.get("skip_reason"))
     loc = raw.get("location") or {}
@@ -370,8 +344,19 @@ def _ensure_analysis_schema(raw: Dict[str, Any]) -> Dict[str, Any]:
         "usd": _coerce_float(price_raw.get("usd") if isinstance(price_raw, dict) else raw.get("price_usd")),
         "fx_rate": _coerce_float(price_raw.get("fx_rate") if isinstance(price_raw, dict) else raw.get("fx_rate")),
         "fx_source": _clean_text_field(price_raw.get("fx_source") if isinstance(price_raw, dict) else raw.get("fx_source")),
-        "fx_ts": _clean_text_field(price_raw.get("fx_ts") if isinstance(price_raw, dict) else raw.get("fx_ts")),
+        "fx_ts": None,
+        "period": _clean_text_field(price_raw.get("period") if isinstance(price_raw, dict) else raw.get("price_period")),
+        "deposit_value_raw": _coerce_float(price_raw.get("deposit_value_raw")),
+        "deposit_currency_raw": _clean_currency(price_raw.get("deposit_currency_raw")),
     }
+    # Never accept an unverified FX calculation supplied by the LLM.
+    # The scraper may enrich with a real quote and explicit date/source later.
+    p = normalized["price"]
+    p["usd"] = p["value_raw"] if p["currency_raw"] == "USD" else None
+    p["fx_rate"] = 1.0 if p["currency_raw"] == "USD" and p["value_raw"] is not None else None
+    p["fx_source"] = None
+    if p["period"] not in {"day", "week", "month", "year", "total"}:
+        p["period"] = None
     normalized["rooms"] = _coerce_int(raw.get("rooms"))
     beds_raw = raw.get("bedrooms") if isinstance(raw.get("bedrooms"), dict) else {}
     normalized["bedrooms"] = {
@@ -391,6 +376,12 @@ def _ensure_analysis_schema(raw: Dict[str, Any]) -> Dict[str, Any]:
         "model": _clean_text_field((raw.get("llm") or {}).get("model") if isinstance(raw.get("llm"), dict) else raw.get("llm_model") or _ensure_model()),
         "prompt_ver": PROMPT_VERSION,
     }
+    if normalized["price"]["period"] in {"day", "week"}:
+        normalized["is_short_term"] = True
+        normalized["long_term"] = False
+    if normalized["price"]["period"] == "month" and normalized["is_rental_offer"] is True:
+        normalized["long_term"] = True
+        normalized["is_short_term"] = False
     if normalized["is_short_term"] is True and normalized["long_term"] is None:
         normalized["long_term"] = False
     if normalized["long_term"] is True and normalized["is_short_term"] is None:
@@ -412,7 +403,7 @@ def _llm_analyze_listing_text(
   "passes_city_country": null,
   "skip_reason": null,
   "location": { "city": null, "country": null, "confidence": null },
-  "price": { "value_raw": null, "currency_raw": null, "source": null, "usd": null, "fx_rate": null, "fx_source": null, "fx_ts": null },
+  "price": { "value_raw": null, "currency_raw": null, "period": null, "deposit_value_raw": null, "deposit_currency_raw": null, "source": null, "usd": null, "fx_rate": null, "fx_source": null, "fx_ts": null },
   "rooms": null,
   "bedrooms": { "value": null, "confidence": null },
   "bathrooms": null,
@@ -428,9 +419,9 @@ def _llm_analyze_listing_text(
 }
 - is_rental_offer: false for sales/ads/contests/wanted posts; true for rental offers; null if unclear. If false, set skip_reason when possible.
 - passes_city_country: whether the offer matches the provided city/country; if clearly elsewhere, set notes="location mismatch".
-- price: value_raw numeric rent (prefer monthly); currency_raw from text/symbols/emojis/ISO; source="explicit" if stated, "inferred_local" if guessed from locale/language/defaults. usd/fx_* can be null if unknown.
+- price: value_raw is the advertised amount, NOT distance/deposit/property sale total. Separate deposit_value_raw and deposit_currency_raw. Include period: day|week|month|year|total|null. Unknown currency must be null; never invent USD or a FX rate. usd/fx_* must be null unless verified outside the LLM.
 - rooms/bedrooms/bathrooms/is_studio: integers/bool; studio => bedrooms=0. Interpret local shorthands ("??????/??????", "1+1/2+1", "T2", "3p", etc.) and infer whether counts mean total rooms or bedrooms based on city/country/language norms.
-- long_term/is_short_term: true/false/null; daily/weekly/airbnb => is_short_term=true; monthly/annual => long_term=true.
+- long_term/is_short_term: true/false/null; daily/weekly/airbnb => is_short_term=true; monthly/annual => long_term=true. Never treat a sale as monthly rent.
 - pets: "allowed" | "not_allowed" | "unspecified".
 - amenities: concise list; district/address: any location hints.
 - lang: inferred content language; llm.model: model name; llm.prompt_ver: r3.
