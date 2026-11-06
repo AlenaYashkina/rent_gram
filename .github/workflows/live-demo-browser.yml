@@ -1,9 +1,8 @@
 name: Verify published Netlify demo in Chromium
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths: [.github/workflows/live-demo-browser.yml]
+  pull_request:
+    paths: [.github/workflows/live-demo-browser.yml, frontend/tests/live-demo.mjs]
 jobs:
   live-demo:
     runs-on: ubuntu-24.04
