@@ -1,3 +1,4 @@
+import { isMonthlyRental, hasValidPrice, dedupeListings } from "./listingRules.mjs";
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { Search, Filter, DollarSign, PawPrint, MapPin, User, Hash, ExternalLink, Bed, Calendar } from "lucide-react";
 
@@ -236,7 +237,7 @@ export default function RentGramFrontMockup() {
         if (res.ok) {
           const text = await res.text();
           const parsed = parseNdjson(text);
-          setListings(parsed);
+          setListings(dedupeListings(parsed));
           setFx((prev) => ({ ...prev, ...normalizeCurrencyRates(parsed) }));
           setStatus("ready");
           return;
@@ -248,7 +249,7 @@ export default function RentGramFrontMockup() {
         const res = await fetch("/out.ndjson", { cache: "no-store" });
         if (res.ok) {
           const data = await res.json();
-          setListings(data);
+          setListings(dedupeListings(data));
           setFx((prev) => ({ ...prev, ...normalizeCurrencyRates(data) }));
           setStatus("ready");
           return;
@@ -301,7 +302,7 @@ export default function RentGramFrontMockup() {
     const base = listings.filter((item) => {
       const a = item.analysis || {};
       // The demo is a long-term rental explorer: never treat sales or daily rates as monthly rent.
-      if (a.is_rental_offer === false || a.is_short_term === true || a.long_term === false) return false;
+      if (!isMonthlyRental(item) || !hasValidPrice(item)) return false;
       const { usd, value } = extractPrice(a);
       const hasPrice = typeof usd === "number" || typeof value === "number";
       if (!hasPrice) return false;
