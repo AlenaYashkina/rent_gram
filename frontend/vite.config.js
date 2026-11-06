@@ -4,12 +4,10 @@ import path from "path";
 import fs from "fs";
 
 const ndjsonMiddleware = () => {
-  const rootOutPath = path.resolve(__dirname, "..", "out.ndjson");
-  const localOutPath = path.resolve(__dirname, "out.ndjson");
+  const demoOutPath = path.resolve(__dirname, "public", "out.ndjson");
   const readNdjson = () => {
-    const candidate = fs.existsSync(rootOutPath) ? rootOutPath : localOutPath;
-    if (!fs.existsSync(candidate)) return null;
-    return fs.readFileSync(candidate, "utf8");
+    if (!fs.existsSync(demoOutPath)) return null;
+    return fs.readFileSync(demoOutPath, "utf8");
   };
   const attach = (server) => {
     server.middlewares.use("/out.ndjson", (req, res, next) => {
