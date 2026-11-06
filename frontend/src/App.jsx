@@ -234,18 +234,6 @@ export default function RentGramFrontMockup() {
       try {
         const res = await fetch("/api/listings", { cache: "no-store" });
         if (res.ok) {
-          const data = await res.json();
-          setListings(data);
-          setFx((prev) => ({ ...prev, ...normalizeCurrencyRates(data) }));
-          setStatus("ready");
-          return;
-        }
-      } catch (error) {
-        console.warn("Failed to fetch feed", error);
-      }
-      try {
-        const res = await fetch("/out.ndjson", { cache: "no-store" });
-        if (res.ok) {
           const text = await res.text();
           const parsed = parseNdjson(text);
           setListings(parsed);
@@ -254,7 +242,19 @@ export default function RentGramFrontMockup() {
           return;
         }
       } catch (error) {
-        console.warn("Fallback fetch failed", error);
+        console.warn("Static demonstration data unavailable", error);
+      }
+      try {
+        const res = await fetch("/out.ndjson", { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          setListings(data);
+          setFx((prev) => ({ ...prev, ...normalizeCurrencyRates(data) }));
+          setStatus("ready");
+          return;
+        }
+      } catch (error) {
+        console.warn("API fallback unavailable", error);
       }
       setStatus("idle");
       setLoadError("Не удалось автоматически загрузить out.ndjson из корня проекта.");
@@ -531,7 +531,7 @@ export default function RentGramFrontMockup() {
             const city = item.city || item.analysis?.location?.city || "";
             const country = item.country || item.analysis?.location?.country || "";
             const bedroomsValue = extractBedrooms(item);
-            const bedroomsLabel = bedroomsValue === 0 ? "Studio" : bedroomsValue;
+            const bedroomsLabel = item.analysis?.is_studio ? "Studio" : bedroomsValue;
             const petsFlag = item.analysis?.pets;
             const petsValue =
               petsFlag === "allowed" ? "Allowed" : petsFlag === "not_allowed" ? "Forbidden" : null;
@@ -552,7 +552,26 @@ export default function RentGramFrontMockup() {
             return (
               <div className="listing-card" key={item.uid}>
                 <div className="listing-embed">
-                  <LazyTelegramEmbed chat={chatUsername} msgId={messageId} snippet={snippet} />
+                  {canEmbed ? (
+                    <LazyTelegramEmbed chat={chatUsername} msgId={messageId} snippet={snippet} />
+                  ) : (
+                    <div className="sample-source">
+                      <div className="sample-source__top">
+                        <span>EXTRACTED SOURCE TEXT</span>
+                        <span className="sample-source__tag">SYNTHETIC DATA</span>
+                      </div>
+                      <div className="sample-source__body">
+                        <div className="sample-source__glyph">RG</div>
+                        <p className="sample-source__title">{address || "Example rental listing"}</p>
+                        <p className="sample-source__text">{item.text || "Fictional example without source text."}</p>
+                      </div>
+                      <div className="sample-source__footer">
+                        <span>Unstructured text</span>
+                        <span>→</span>
+                        <span>Structured fields</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="listing-meta">
                   {priceMeta && (
